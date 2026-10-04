@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'sha256-{{ css_hash }}'; script-src 'sha256-{{ script_hash }}'; img-src data:; base-uri 'none'; form-action 'none'; connect-src 'none'">
+  <meta name="referrer" content="no-referrer">
+  <title>{{ narrative.title }} · Aegis assessment</title>
+  <style>{{ css|safe }}</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="rail">
+    <a class="brand" href="#cover"><span class="brand-mark">A</span><span>AEGIS<span class="brand-sub">CONFIDENTIALITY AUDIT</span></span></a>
+    <div class="rail-label">ASSESSMENT DOSSIER <span>01 / 10</span></div>
+    <nav aria-label="Report sections">
+      <a href="#assessment" class="overview">Executive assessment <span>↗</span></a>
+      {% for s in report.sections %}<a href="#step-{{ s.id }}"><span class="nav-number">{{ '%02d'|format(s.id) }}</span>{{ s.tag|title }}</a>{% endfor %}
+      <a href="#roadmap" class="overview">Action roadmap <span>↗</span></a>
+    </nav>
+    <div class="rail-bottom"><span class="pulse-dot"></span> Evidence before assurance.<p>ISO/IEC 27001:2022<br>ISO/IEC 27002:2022</p><button id="print-report" type="button">Print / Save PDF <span>↗</span></button></div>
+  </aside>
+  <main>
+    <header class="cover" id="cover">
+      <div class="cover-top"><span class="eyebrow">SECURITY ENGINEERING / AUDIT READINESS</span><span class="edition">AEGIS MCP · DOSSIER 001</span></div>
+      {% if report.illustrative|default(false) %}<p class="preview-label">DESIGN PREVIEW · SYNTHETIC EVIDENCE · NO SYSTEM AUDITED</p>{% endif %}
+      <div class="cover-center"><span class="chapter-line">TEN STEPS. ONE CONFIDENTIALITY BOUNDARY.</span><h1>{{ narrative.title }}</h1><p class="cover-deck">{{ report.subject }}</p><div class="cover-symbol" aria-hidden="true">A<span>+</span></div></div>
+      <div class="target-strip"><span>TARGET <strong>{{ report.target_id }}</strong></span><span>TRANSPORT <strong>{{ report.transport|upper }}</strong></span><span>CLASSIFICATION <strong>{{ report.classification|upper }}</strong></span><span>COLLECTED <strong>{{ report.at[:10] }}</strong></span></div>
+      <div class="metrics" aria-label="Observed check counts">
+        <div><span class="metric-label">VERIFIED CHECKS</span><strong>{{ report.summary.pass }}<span>PASS</span></strong><p>Observed at collection time</p></div>
+        <div><span class="metric-label">OPEN FINDINGS</span><strong class="finding-number">{{ report.summary.fail }}<span>FINDINGS</span></strong><p>Require proportionate treatment</p></div>
+        <div><span class="metric-label">EVIDENCE GAPS</span><strong>{{ report.summary.unknown }}<span>UNKNOWN</span></strong><p>Further evidence required</p></div>
+        <div><span class="metric-label">OUTSIDE TARGET SCOPE</span><strong>{{ report.summary.not_applicable }}<span>N/A</span></strong><p>Assess the owning environment</p></div>
+      </div>
+    </header>
+
+    <article class="document">
+      <section class="executive" id="assessment"><div class="section-eyebrow">01 / EXECUTIVE ASSESSMENT</div><div class="editorial-heading"><h2>A clear view of<br>what the evidence says.</h2><span class="folio">OBSERVE.<br>TREAT.<br>VERIFY.</span></div><p class="lead">{{ narrative.executive_summary }}</p><p>{{ narrative.context }}</p><div class="scope-note"><strong>Read this report as an assessment.</strong><span>Observed settings, unknowns and required reviews are separate. No technical score or presentation quality establishes ISO conformity.</span></div>
+      <div class="facts-grid"><div><span>PLATFORM</span><strong>{{ report.facts.os }}</strong></div><div><span>ENVIRONMENT</span><strong>{% if report.facts.wsl %}WSL guest{% elif report.facts.container %}Container guest{% else %}Linux system{% endif %}</strong></div><div><span>ACCOUNTABLE OWNER</span><strong>{{ report.owner }}</strong></div></div></section>
+
+      {% if report.comparison %}<section class="comparison"><div class="section-eyebrow">02 / CHANGE VERIFICATION</div><h2>The before and after.</h2><p>Snapshots from the same registered target. Status transitions are evidence, not a compliance percentage.</p><div class="table-wrap"><table><thead><tr><th>Check</th><th>Before</th><th>After</th></tr></thead><tbody>{% for c in report.comparison.changes %}<tr><td><span class="evidence-id">{{ c.id }}</span> {{ c.title }}</td><td>{{ c.before }}</td><td>{{ c.after }}</td></tr>{% else %}<tr><td colspan="3">No check status changed between these snapshots.</td></tr>{% endfor %}</tbody></table></div></section>{% endif %}
+
+      <section class="process-intro"><div class="section-eyebrow">THE HARDENING PROCESS / 10 CONTROL DOMAINS</div><h2>From system boundary<br>to defensible evidence.</h2><p>A repeatable path through the confidentiality controls. Each step connects the risk, the observed state and the review that remains.</p><div class="filters" aria-label="Filter evidence"><button class="active" data-filter="all" type="button">All evidence</button><button data-filter="fail" type="button">Findings</button><button data-filter="unknown" type="button">Evidence gaps</button><button data-filter="pass" type="button">Passed checks</button><label class="search-label"><span>Search</span><input id="search" type="search" placeholder="Find a check or control" aria-label="Search evidence"></label></div><p id="filter-status" class="filter-status" aria-live="polite"></p></section>
+
+      {% for s in report.sections %}<section class="process-step" id="step-{{ s.id }}"><div class="step-heading"><span class="step-number">{{ '%02d'|format(s.id) }}</span><div><span class="section-eyebrow">{{ s.tag }}</span><h3>{{ s.title }}</h3></div><span class="step-label">STEP {{ '%02d'|format(s.id) }} / 10</span></div><div class="step-body"><div class="step-story"><p class="risk"><span>CONFIDENTIALITY RISK</span>{{ s.risk }}</p><p>{{ notes.get(s.id, s.action) }}</p><div class="control-chips">{% for c in s.controls %}<span>{{ c }}</span>{% endfor %}</div><p class="clause-note">ISMS clause links: {{ s.clauses|join(', ') }} · suggested applicability</p></div><div class="step-evidence"><div class="table-wrap"><table><thead><tr><th>Observed control</th><th>Status</th></tr></thead><tbody>{% for c in s.checks %}<tr class="check-row" data-status="{{ c.status }}" data-search="{{ c.id }} {{ c.title }} {{ c.controls|join(' ') }} {{ c.observation }}"><td><span class="evidence-id">{{ c.id }}</span><strong class="check-title">{{ c.title }}</strong><p>{{ c.observation }}</p><span class="source">SOURCE · {{ c.source }}</span></td><td><span class="status status-{{ c.status }}">{{ c.status|replace('_', ' ') }}</span></td></tr>{% endfor %}</tbody></table></div></div></div><div class="human-review"><span class="review-icon">↗</span><div><strong>Independent review remains</strong><p>{{ s.review }}</p></div></div></section>{% endfor %}
+
+      <section class="roadmap" id="roadmap"><div class="section-eyebrow">NEXT / PRIORITIZED TREATMENT</div><h2>Turn findings into<br>owned, verifiable actions.</h2><ol>{% for p in narrative.priorities %}<li><span>{{ '%02d'|format(loop.index) }}</span><p>{{ p }}</p><strong>ASSIGN OWNER → VERIFY</strong></li>{% else %}<li><span>01</span><p>Resolve the remaining evidence gaps and independently review all ten control domains.</p><strong>REVIEW → VERIFY</strong></li>{% endfor %}</ol><p class="narrative-label">Summary and priorities are commentary{% if narrative.step_notes %} supplied by the connected AI{% endif %}. Evidence tables remain tied to the collected snapshot.</p></section>
+
+      <section class="methodology"><div class="section-eyebrow">METHOD / LIMITS / PROVENANCE</div><h2>A report you can trace.</h2><div class="method-grid"><div><h4>Bounded collection</h4><p>Selected settings and metadata are collected from a locally registered target. File contents containing confidential data, password hashes and private keys are excluded. Application authorization, external TLS, cloud policy and recovery tests need separate evidence.</p></div><div><h4>Standards alignment</h4><p>ISO mappings are original educational suggestions. Confirm control applicability, the Statement of Applicability and organizational requirements with a qualified reviewer. Include the 2024 context amendment in the real ISMS scope review.</p></div><div><h4>Evidence integrity</h4><p>Snapshot identifiers use SHA-256. The local event chain detects accidental modification, but a workspace administrator can rewrite it. Independent custody or signed external evidence is needed for stronger assurance.</p></div><div><h4>Time and ownership</h4><p>Findings describe the target at collection time. A container or WSL guest cannot establish every host control. Assign owners, document accepted risk and retest changes before closing findings.</p></div></div><div class="evidence-footer"><span>EVIDENCE SNAPSHOT</span><code>{{ report.audit_id }}</code><span>COLLECTED {{ report.at }}</span></div><ul class="references">{% for s in report.sources %}<li><a href="{{ s.url }}" rel="noopener noreferrer">{{ s.title }} ↗</a></li>{% endfor %}</ul></section>
+      <footer><span class="footer-wordmark">AEGIS<span>+</span></span><p>Confidentiality audit preparation.<br>Evidence before assurance.</p><span>END OF DOSSIER / 10 STEPS</span></footer>
+    </article>
+  </main>
+</div>
+<script>{{ script|safe }}</script>
+</body>
+</html>

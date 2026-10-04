@@ -1,0 +1,1122 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'sha256-Xa3W1+HcJjak5YUZmPp7SHkXuR1G/p1wnJsaoi9Bj5w='; script-src 'sha256-EoKRMiZRegTIBm54B/x1qPe2y8AVoThAnVJzYUiHVJM='; img-src data:; base-uri 'none'; form-action 'none'; connect-src 'none'">
+  <meta name="referrer" content="no-referrer">
+  <title>Confidentiality, by design. · Aegis assessment</title>
+  <style>:root {
+  --ink: #102027;
+  --night: #0a171d;
+  --mint: #b8f3d1;
+  --paper: #fafbf8;
+  --muted: #64716c;
+  --line: #dee4de;
+  --red: #a84332;
+  --amber: #916917;
+  --mono: ui-monospace, SFMono-Regular, Consolas, monospace;
+  --sans: Inter, "Segoe UI", Arial, sans-serif;
+}
+* {
+  box-sizing: border-box;
+}
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 24px;
+}
+body {
+  margin: 0;
+  background: #071218;
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.65;
+}
+a {
+  color: inherit;
+  text-decoration: none;
+}
+button,
+input {
+  font: inherit;
+}
+button {
+  cursor: pointer;
+}
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
+  outline: 3px solid #5db586;
+  outline-offset: 4px;
+}
+.shell {
+  max-width: 1700px;
+  margin: auto;
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+}
+.rail {
+  padding: 36px 24px;
+  color: #c9d3cf;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #0b171d;
+  border-right: 1px solid #23323a;
+}
+.brand {
+  display: flex;
+  gap: 13px;
+  align-items: center;
+  font-size: 20px;
+  font-weight: 750;
+  letter-spacing: 3px;
+}
+.brand-mark {
+  width: 39px;
+  height: 43px;
+  background: var(--mint);
+  clip-path: polygon(0 0, 100% 0, 100% 73%, 50% 100%, 0 73%);
+  color: #0b171d;
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+  font-weight: 850;
+  padding-bottom: 5px;
+  letter-spacing: 0;
+}
+.brand-sub {
+  display: block;
+  font: 8px var(--mono);
+  letter-spacing: 1.8px;
+  margin-top: 1px;
+  color: #81958c;
+}
+.rail-label {
+  font: 9px var(--mono);
+  letter-spacing: 1.2px;
+  border-top: 1px solid #28363a;
+  margin-top: 42px;
+  padding-top: 19px;
+  color: #82958c;
+  display: flex;
+  justify-content: space-between;
+}
+.rail nav {
+  margin-top: 16px;
+}
+.rail nav a {
+  display: flex;
+  gap: 13px;
+  align-items: center;
+  padding: 9px 5px;
+  font-size: 12px;
+  border-radius: 4px;
+}
+.rail nav a:hover,
+.rail nav a.current {
+  background: #1a2b2c;
+  color: var(--mint);
+}
+.nav-number {
+  font: 10px var(--mono);
+  color: #678577;
+}
+.rail .overview {
+  padding: 12px 5px;
+  margin-bottom: 8px;
+  font-weight: 600;
+  border-bottom: 1px solid #27353a;
+  border-radius: 0;
+}
+.overview span {
+  margin-left: auto;
+}
+.rail-bottom {
+  margin-top: auto;
+  padding-top: 25px;
+  font-size: 11px;
+  color: #93aaa0;
+}
+.rail-bottom p {
+  font: 10px/1.8 var(--mono);
+  color: #668174;
+  margin: 18px 0;
+}
+.pulse-dot {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  background: var(--mint);
+  border-radius: 50%;
+  margin-right: 6px;
+}
+.rail-bottom button {
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid #3c514a;
+  color: var(--mint);
+  background: none;
+  text-align: left;
+  font-size: 11px;
+}
+.rail-bottom button span {
+  float: right;
+}
+.cover {
+  position: relative;
+  color: #f0f5ed;
+  background:
+    radial-gradient(ellipse at 89% 22%, #1d4038 0, transparent 48%),
+    linear-gradient(120deg, #101f27, #102322 70%, #19332b);
+  overflow: hidden;
+  padding: 35px 58px 0;
+}
+.cover:before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(#abc8b708 1px, transparent 1px),
+    linear-gradient(90deg, #abc8b708 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+.cover-top {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+.eyebrow,
+.edition,
+.chapter-line,
+.section-eyebrow,
+.metric-label {
+  font: 10px var(--mono);
+  letter-spacing: 1.6px;
+}
+.eyebrow {
+  color: #a4b5ac;
+}
+.edition {
+  color: #779789;
+  letter-spacing: 1px;
+}
+.cover-center {
+  position: relative;
+  padding: 77px 0 63px;
+  max-width: 850px;
+}
+.chapter-line {
+  color: var(--mint);
+  font-size: 10px;
+  letter-spacing: 2px;
+}
+h1 {
+  font-size: clamp(48px, 5.7vw, 88px);
+  font-weight: 600;
+  line-height: 1.03;
+  letter-spacing: -5px;
+  max-width: 780px;
+  margin: 26px 0 25px;
+  position: relative;
+  z-index: 1;
+}
+.cover-deck {
+  max-width: 530px;
+  color: #a5b9b0;
+  font-size: 14px;
+  line-height: 1.75;
+}
+.cover-symbol {
+  position: absolute;
+  right: -92px;
+  top: 8px;
+  font-size: 350px;
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: -24px;
+  color: #b8f3d106;
+  transform: rotate(-8deg);
+  pointer-events: none;
+}
+.cover-symbol span {
+  color: #b8f3d112;
+  font-weight: 300;
+  font-size: 130px;
+  position: absolute;
+  right: -60px;
+  top: 10px;
+}
+.target-strip {
+  position: relative;
+  border-top: 1px solid #ffffff24;
+  border-bottom: 1px solid #ffffff24;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 28px;
+  padding: 18px 0;
+  font: 8px var(--mono);
+  letter-spacing: 1.4px;
+  color: #79998a;
+}
+.target-strip strong {
+  display: block;
+  margin-top: 5px;
+  font-size: 10px;
+  font-weight: 500;
+  color: #d3dfd6;
+  letter-spacing: 0.4px;
+}
+.metrics {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  padding: 30px 0 32px;
+  gap: 16px;
+}
+.metrics > div {
+  border-right: 1px solid #ffffff19;
+  padding-right: 10px;
+}
+.metrics > div:last-child {
+  border: 0;
+}
+.metric-label {
+  font-size: 8px;
+  color: #85a796;
+  letter-spacing: 1.2px;
+}
+.metrics strong {
+  display: flex;
+  align-items: baseline;
+  gap: 11px;
+  font-size: 47px;
+  font-weight: 400;
+  line-height: 1.3;
+  color: var(--mint);
+  letter-spacing: -2px;
+  margin-top: 6px;
+}
+.metrics strong span {
+  font: 8px var(--mono);
+  color: #9bafa3;
+  letter-spacing: 1px;
+}
+.metrics strong.finding-number {
+  color: #f0b6a6;
+}
+.metrics p {
+  font-size: 10px;
+  color: #7f9b8c;
+  margin: 7px 0 0;
+}
+.document {
+  background: var(--paper);
+  padding: 60px 58px 0;
+}
+.section-eyebrow {
+  color: #608170;
+  font-size: 9px;
+  letter-spacing: 1.8px;
+}
+h2 {
+  font-size: 36px;
+  line-height: 1.15;
+  font-weight: 600;
+  letter-spacing: -1.5px;
+  margin: 20px 0 22px;
+}
+h3 {
+  font-size: 24px;
+  line-height: 1.2;
+  letter-spacing: -0.7px;
+  font-weight: 600;
+  margin: 7px 0 0;
+}
+h4 {
+  font-size: 15px;
+  margin: 0 0 10px;
+}
+.editorial-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
+}
+.folio {
+  font: 10px/1.8 var(--mono);
+  letter-spacing: 1px;
+  color: #8d9f93;
+}
+.executive p {
+  max-width: 820px;
+  color: #64726b;
+  line-height: 1.85;
+}
+.executive .lead {
+  font-size: 17px;
+  color: #283d32;
+  line-height: 1.85;
+}
+.scope-note {
+  border-left: 3px solid #79ad8e;
+  display: flex;
+  flex-direction: column;
+  padding: 12px 20px;
+  background: #eef3eb;
+  margin: 25px 0 28px;
+  font-size: 12px;
+  gap: 6px;
+}
+.scope-note span {
+  color: #63786b;
+}
+.facts-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  padding: 22px 0;
+  gap: 25px;
+}
+.facts-grid span {
+  display: block;
+  font: 8px var(--mono);
+  letter-spacing: 1.4px;
+  color: #7d8e81;
+}
+.facts-grid strong {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  margin-top: 8px;
+  overflow-wrap: anywhere;
+}
+.comparison {
+  padding: 42px 0 15px;
+}
+.comparison p,
+.process-intro p {
+  font-size: 13px;
+  color: var(--muted);
+  max-width: 610px;
+}
+.process-intro {
+  padding: 55px 0 26px;
+  border-bottom: 1px solid var(--line);
+}
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 27px;
+  align-items: center;
+}
+.filters button {
+  background: transparent;
+  border: 1px solid var(--line);
+  font-size: 10px;
+  color: #718075;
+  padding: 7px 11px;
+  border-radius: 20px;
+}
+.filters button.active {
+  background: #1c392c;
+  border-color: #1c392c;
+  color: #fff;
+}
+.search-label {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 10px;
+  color: #7a8a7e;
+}
+.search-label input {
+  width: 180px;
+  border: 0;
+  border-bottom: 1px solid #b8c7bc;
+  background: none;
+  padding: 5px;
+  font-size: 10px;
+  color: var(--ink);
+}
+.process-intro .filter-status {
+  font: 9px var(--mono);
+  color: #89978d;
+  margin-bottom: 0;
+}
+.process-step {
+  padding: 36px 0;
+  border-bottom: 1px solid var(--line);
+  scroll-margin-top: 28px;
+}
+.step-heading {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.step-number {
+  font-size: 44px;
+  font-weight: 300;
+  letter-spacing: -2px;
+  color: #a8bbac;
+  line-height: 1;
+}
+.step-label {
+  margin-left: auto;
+  font: 8px var(--mono);
+  color: #99a899;
+  letter-spacing: 1px;
+  white-space: nowrap;
+}
+.step-body {
+  display: grid;
+  grid-template-columns: minmax(210px, 0.8fr) minmax(0, 1.4fr);
+  gap: 32px;
+  margin-top: 25px;
+}
+.step-story p {
+  font-size: 12px;
+  line-height: 1.8;
+  color: #5f7265;
+  margin-top: 0;
+}
+.step-story .risk {
+  font-size: 13px;
+  color: #2c4937;
+  line-height: 1.65;
+}
+.risk span {
+  display: block;
+  font: 8px var(--mono);
+  color: #89998b;
+  letter-spacing: 1.2px;
+  margin-bottom: 9px;
+}
+.control-chips {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+.control-chips span {
+  border: 1px solid #d4dfd2;
+  background: #f1f5ef;
+  padding: 4px 6px;
+  font: 9px var(--mono);
+  color: #627c68;
+  border-radius: 3px;
+}
+.step-story .clause-note {
+  font-size: 9px;
+  color: #8a988a;
+  margin-top: 9px;
+}
+.table-wrap {
+  overflow-x: auto;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  text-align: left;
+  font-size: 11px;
+}
+th {
+  font: 8px var(--mono);
+  color: #7c9180;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 10px 9px;
+  border-bottom: 1px solid #c5d3c8;
+  background: #f0f4ed;
+}
+td {
+  padding: 13px 9px;
+  border-bottom: 1px solid #e4eae0;
+  vertical-align: top;
+}
+td:last-child {
+  width: 108px;
+}
+td p {
+  font-size: 10px;
+  line-height: 1.7;
+  color: #7b8c7b;
+  margin: 7px 0 5px;
+}
+.check-title {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  margin-top: 3px;
+  overflow-wrap: anywhere;
+}
+.evidence-id {
+  font: 9px var(--mono);
+  color: #93a390;
+}
+.source {
+  font: 7px/1.6 var(--mono);
+  color: #a0ad9a;
+  overflow-wrap: anywhere;
+}
+.status {
+  display: inline-block;
+  padding: 3px 7px;
+  white-space: nowrap;
+  border: 1px solid #d3ded0;
+  border-radius: 3px;
+  font: 8px var(--mono);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-top: 3px;
+}
+.status-pass {
+  color: #377549;
+  background: #e8f4e7;
+  border-color: #c9e4c9;
+}
+.status-fail {
+  color: #a14d3c;
+  background: #fbeddf;
+  border-color: #efcfba;
+}
+.status-unknown {
+  color: #967328;
+  background: #f8f2dd;
+  border-color: #e8dfba;
+}
+.status-not_applicable {
+  color: #879288;
+  background: #edf0ea;
+}
+.human-review {
+  display: flex;
+  gap: 13px;
+  background: #eef2e9;
+  border: 1px solid #e4e9de;
+  padding: 15px 18px;
+  margin-top: 23px;
+}
+.review-icon {
+  font-size: 21px;
+  color: #799679;
+  line-height: 1;
+}
+.human-review strong {
+  display: block;
+  font: 8px var(--mono);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #6b8069;
+}
+.human-review p {
+  font-size: 10px;
+  line-height: 1.7;
+  color: #87947e;
+  margin: 6px 0 0;
+}
+.roadmap {
+  padding: 50px 0 40px;
+}
+.roadmap ol {
+  padding: 0;
+  list-style: none;
+  margin: 27px 0;
+}
+.roadmap li {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  border-top: 1px solid var(--line);
+  padding: 16px 0;
+}
+.roadmap li:last-child {
+  border-bottom: 1px solid var(--line);
+}
+.roadmap li > span {
+  font: 12px var(--mono);
+  color: #86a187;
+}
+.roadmap li p {
+  margin: 0;
+  font-size: 12px;
+  flex: 1;
+  color: #54715a;
+}
+.roadmap li strong {
+  font: 7px var(--mono);
+  color: #8a9d86;
+  letter-spacing: 0.4px;
+}
+.narrative-label {
+  font-size: 9px;
+  color: #94a18c;
+}
+.methodology {
+  padding: 35px 0 40px;
+  border-top: 1px solid var(--line);
+}
+.method-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 25px 40px;
+}
+.method-grid p {
+  font-size: 11px;
+  color: #84907e;
+  line-height: 1.8;
+}
+.evidence-footer {
+  display: flex;
+  flex-direction: column;
+  background: #eef1e8;
+  padding: 18px;
+  gap: 7px;
+  margin-top: 28px;
+  font: 8px var(--mono);
+  color: #869580;
+  letter-spacing: 0.5px;
+}
+.evidence-footer code {
+  font: 9px var(--mono);
+  color: #5f775e;
+  overflow-wrap: anywhere;
+}
+.references {
+  padding: 0;
+  list-style: none;
+  font-size: 10px;
+  color: #81927d;
+  margin-top: 20px;
+}
+.references li {
+  margin: 5px 0;
+}
+.references a:hover {
+  text-decoration: underline;
+}
+footer {
+  border-top: 1px solid #cbd7c9;
+  display: flex;
+  align-items: center;
+  gap: 25px;
+  padding: 25px 0 35px;
+}
+footer p {
+  font-size: 9px;
+  color: #899c80;
+  line-height: 1.6;
+}
+footer > span:last-child {
+  margin-left: auto;
+  font: 8px var(--mono);
+  color: #9aad91;
+  letter-spacing: 0.8px;
+}
+.footer-wordmark {
+  font-size: 27px;
+  letter-spacing: -1px;
+  font-weight: 700;
+  color: #1c3c2a;
+}
+.footer-wordmark span {
+  font-weight: 300;
+  color: #7ba681;
+}
+.preview-label {
+  position: relative;
+  font: 9px var(--mono);
+  color: #f8d79d;
+  border: 1px solid #786948;
+  display: inline-block;
+  padding: 6px 10px;
+  margin-top: 20px;
+}
+[hidden] {
+  display: none !important;
+}
+@media (max-width: 1150px) {
+  .shell {
+    grid-template-columns: 195px minmax(0, 1fr);
+  }
+  .rail {
+    padding: 26px 18px;
+  }
+  .cover {
+    padding: 28px 35px 0;
+  }
+  .document {
+    padding: 45px 35px 0;
+  }
+  .step-body {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  .step-story {
+    max-width: 100%;
+  }
+  .cover-top .edition {
+    display: none;
+  }
+  h1 {
+    letter-spacing: -3px;
+    font-size: 65px;
+  }
+  .metrics {
+    gap: 10px;
+  }
+  .metrics strong {
+    font-size: 38px;
+    gap: 7px;
+  }
+  .metric-label {
+    font-size: 7px;
+  }
+  .search-label {
+    margin-left: 0;
+    margin-top: 8px;
+  }
+  .search-label input {
+    width: 220px;
+  }
+}
+@media (max-width: 760px) {
+  .shell {
+    display: block;
+  }
+  .rail {
+    position: relative;
+    height: auto;
+    padding: 18px 22px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .rail nav,
+  .rail-label,
+  .rail-bottom p {
+    display: none;
+  }
+  .rail-bottom {
+    margin: 0;
+    padding: 0;
+    font-size: 0;
+  }
+  .rail-bottom .pulse-dot {
+    display: none;
+  }
+  .rail-bottom button {
+    width: auto;
+    font-size: 10px;
+  }
+  .cover {
+    padding: 24px 25px 0;
+  }
+  .cover-center {
+    padding: 55px 0 35px;
+  }
+  h1 {
+    font-size: 52px;
+    letter-spacing: -2.5px;
+  }
+  .cover-deck {
+    font-size: 12px;
+  }
+  .eyebrow {
+    font-size: 8px;
+  }
+  .chapter-line {
+    font-size: 8px;
+    letter-spacing: 1px;
+  }
+  .target-strip {
+    gap: 20px;
+  }
+  .metrics {
+    grid-template-columns: repeat(2, 1fr);
+    row-gap: 25px;
+  }
+  .metrics > div:nth-child(2) {
+    border: 0;
+  }
+  .document {
+    padding: 38px 25px 0;
+  }
+  h2 {
+    font-size: 29px;
+  }
+  .folio {
+    display: none;
+  }
+  .executive .lead {
+    font-size: 15px;
+  }
+  .facts-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .step-heading {
+    gap: 14px;
+  }
+  .step-number {
+    font-size: 36px;
+  }
+  h3 {
+    font-size: 21px;
+  }
+  .step-label {
+    display: none;
+  }
+  .method-grid {
+    grid-template-columns: 1fr;
+  }
+  .roadmap li strong {
+    display: none;
+  }
+  footer > span:last-child {
+    display: none;
+  }
+  .cover-symbol {
+    font-size: 260px;
+    right: -90px;
+    top: 80px;
+  }
+  .cover-symbol span {
+    font-size: 80px;
+  }
+  td:last-child {
+    width: 85px;
+  }
+  .status {
+    font-size: 7px;
+  }
+  .editorial-heading h2 br {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+@media print {
+  @page {
+    size: A4;
+    margin: 12mm;
+  }
+  body {
+    background: white;
+    font-size: 11px;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+  .shell {
+    display: block;
+  }
+  .rail,
+  .filters,
+  .filter-status {
+    display: none;
+  }
+  .cover {
+    padding: 20px 24px 0;
+  }
+  .cover-center {
+    padding: 35px 0 25px;
+  }
+  h1 {
+    font-size: 52px;
+    letter-spacing: -2px;
+  }
+  .cover-symbol {
+    font-size: 220px;
+    right: 0;
+  }
+  .cover-symbol span {
+    font-size: 70px;
+  }
+  .cover-deck {
+    font-size: 11px;
+  }
+  .metrics {
+    padding: 18px 0;
+  }
+  .metrics strong {
+    font-size: 31px;
+  }
+  .document {
+    padding: 28px 16px 0;
+  }
+  h2 {
+    font-size: 25px;
+  }
+  h3 {
+    font-size: 19px;
+  }
+  .step-body {
+    grid-template-columns: 0.8fr 1.4fr;
+    gap: 20px;
+  }
+  .process-step {
+    padding: 25px 0;
+  }
+  .human-review,
+  .step-heading,
+  tr,
+  .facts-grid,
+  .method-grid > div {
+    break-inside: avoid;
+  }
+  .process-intro {
+    padding: 28px 0 15px;
+  }
+  .process-step {
+    scroll-margin-top: 0;
+  }
+  .executive .lead {
+    font-size: 12px;
+  }
+  .target-strip {
+    gap: 18px;
+  }
+  .method-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .references {
+    font-size: 9px;
+  }
+  a[href^="http"] {
+    text-decoration: none;
+  }
+  .source {
+    color: #6d7d67;
+  }
+  .check-row[hidden] {
+    display: table-row !important;
+  }
+  .table-wrap {
+    overflow: visible;
+  }
+  footer {
+    padding-bottom: 10px;
+  }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="rail">
+    <a class="brand" href="#cover"><span class="brand-mark">A</span><span>AEGIS<span class="brand-sub">CONFIDENTIALITY AUDIT</span></span></a>
+    <div class="rail-label">ASSESSMENT DOSSIER <span>01 / 10</span></div>
+    <nav aria-label="Report sections">
+      <a href="#assessment" class="overview">Executive assessment <span>↗</span></a>
+      <a href="#step-1"><span class="nav-number">01</span>Scope</a><a href="#step-2"><span class="nav-number">02</span>Baseline</a><a href="#step-3"><span class="nav-number">03</span>Identity</a><a href="#step-4"><span class="nav-number">04</span>Network</a><a href="#step-5"><span class="nav-number">05</span>Encryption</a><a href="#step-6"><span class="nav-number">06</span>System</a><a href="#step-7"><span class="nav-number">07</span>Data</a><a href="#step-8"><span class="nav-number">08</span>Monitoring</a><a href="#step-9"><span class="nav-number">09</span>Recovery</a><a href="#step-10"><span class="nav-number">10</span>Evidence</a>
+      <a href="#roadmap" class="overview">Action roadmap <span>↗</span></a>
+    </nav>
+    <div class="rail-bottom"><span class="pulse-dot"></span> Evidence before assurance.<p>ISO/IEC 27001:2022<br>ISO/IEC 27002:2022</p><button id="print-report" type="button">Print / Save PDF <span>↗</span></button></div>
+  </aside>
+  <main>
+    <header class="cover" id="cover">
+      <div class="cover-top"><span class="eyebrow">SECURITY ENGINEERING / AUDIT READINESS</span><span class="edition">AEGIS MCP · DOSSIER 001</span></div>
+      <p class="preview-label">DESIGN PREVIEW · SYNTHETIC EVIDENCE · NO SYSTEM AUDITED</p>
+      <div class="cover-center"><span class="chapter-line">TEN STEPS. ONE CONFIDENTIALITY BOUNDARY.</span><h1>Confidentiality, by design.</h1><p class="cover-deck">Summary of a Ten-Step Best-Practice Guide to the Hardening Process of an Information System in Preparation for a Confidentiality Audit</p><div class="cover-symbol" aria-hidden="true">A<span>+</span></div></div>
+      <div class="target-strip"><span>TARGET <strong>synthetic-preview</strong></span><span>TRANSPORT <strong>LOCAL</strong></span><span>CLASSIFICATION <strong>CONFIDENTIAL</strong></span><span>COLLECTED <strong>2026-10-05</strong></span></div>
+      <div class="metrics" aria-label="Observed check counts">
+        <div><span class="metric-label">VERIFIED CHECKS</span><strong>15<span>PASS</span></strong><p>Observed at collection time</p></div>
+        <div><span class="metric-label">OPEN FINDINGS</span><strong class="finding-number">6<span>FINDINGS</span></strong><p>Require proportionate treatment</p></div>
+        <div><span class="metric-label">EVIDENCE GAPS</span><strong>2<span>UNKNOWN</span></strong><p>Further evidence required</p></div>
+        <div><span class="metric-label">OUTSIDE TARGET SCOPE</span><strong>0<span>N/A</span></strong><p>Assess the owning environment</p></div>
+      </div>
+    </header>
+
+    <article class="document">
+      <section class="executive" id="assessment"><div class="section-eyebrow">01 / EXECUTIVE ASSESSMENT</div><div class="editorial-heading"><h2>A clear view of<br>what the evidence says.</h2><span class="folio">OBSERVE.<br>TREAT.<br>VERIFY.</span></div><p class="lead">This assessment records 15 passing checks, 6 findings, 2 checks without sufficient evidence, and 0 checks outside this target&#39;s technical scope. The ten-step process prioritizes confidentiality and preserves the distinction between observed settings, proposed treatment and independent review. These results support audit preparation; they do not establish ISO conformity or certification.</p><p>Registered target synthetic-preview was assessed through the local adapter. The assessment reads selected system settings and metadata; application-level authorization, cloud controls and organizational practices need additional evidence.</p><div class="scope-note"><strong>Read this report as an assessment.</strong><span>Observed settings, unknowns and required reviews are separate. No technical score or presentation quality establishes ISO conformity.</span></div>
+      <div class="facts-grid"><div><span>PLATFORM</span><strong>Ubuntu 24.04 LTS</strong></div><div><span>ENVIRONMENT</span><strong>Linux system</strong></div><div><span>ACCOUNTABLE OWNER</span><strong>Illustrative system owner</strong></div></div></section>
+
+
+
+      <section class="process-intro"><div class="section-eyebrow">THE HARDENING PROCESS / 10 CONTROL DOMAINS</div><h2>From system boundary<br>to defensible evidence.</h2><p>A repeatable path through the confidentiality controls. Each step connects the risk, the observed state and the review that remains.</p><div class="filters" aria-label="Filter evidence"><button class="active" data-filter="all" type="button">All evidence</button><button data-filter="fail" type="button">Findings</button><button data-filter="unknown" type="button">Evidence gaps</button><button data-filter="pass" type="button">Passed checks</button><label class="search-label"><span>Search</span><input id="search" type="search" placeholder="Find a check or control" aria-label="Search evidence"></label></div><p id="filter-status" class="filter-status" aria-live="polite"></p></section>
+
+      <section class="process-step" id="step-1"><div class="step-heading"><span class="step-number">01</span><div><span class="section-eyebrow">SCOPE</span><h3>Scope, inventory and classify</h3></div><span class="step-label">STEP 01 / 10</span></div><div class="step-body"><div class="step-story"><p class="risk"><span>CONFIDENTIALITY RISK</span>Unknown assets and unclassified information escape protection.</p><p>Identify the target OS, environment, owner, sensitive paths and confidentiality boundary.</p><div class="control-chips"><span>A.5.9</span><span>A.5.12</span><span>A.5.13</span></div><p class="clause-note">ISMS clause links: 4.3, 6.1.2 · suggested applicability</p></div><div class="step-evidence"><div class="table-wrap"><table><thead><tr><th>Observed control</th><th>Status</th></tr></thead><tbody><tr class="check-row" data-status="pass" data-search="C01 Operating system identified A.5.9 A.5.12 A.5.13 Ubuntu 24.04 LTS; x86_64; kernel 6.8.0-example"><td><span class="evidence-id">C01</span><strong class="check-title">Operating system identified</strong><p>Ubuntu 24.04 LTS; x86_64; kernel 6.8.0-example</p><span class="source">SOURCE · /etc/os-release</span></td><td><span class="status status-pass">pass</span></td></tr><tr class="check-row" data-status="pass" data-search="C02 Owner and classification recorded A.5.9 A.5.12 A.5.13 Owner: Illustrative system owner; classification: confidential. Operator statements need scope approval."><td><span class="evidence-id">C02</span><strong class="check-title">Owner and classification recorded</strong><p>Owner: Illustrative system owner; classification: confidential. Operator statements need scope approval.</p><span class="source">SOURCE · Operator target configuration</span></td><td><span class="status status-pass">pass</span></td></tr></tbody></table></div></div></div><div class="human-review"><span class="review-icon">↗</span><div><strong>Independent review remains</strong><p>Approve the ISMS scope, inventory, classification and asset ownership.</p></div></div></section><section class="process-step" id="step-2"><div class="step-heading"><span class="step-number">02</span><div><span class="section-eyebrow">BASELINE</span><h3>Maintain a patched baseline</h3></div><span class="step-label">STEP 02 / 10</span></div><div class="step-body"><div class="step-story"><p class="risk"><span>CONFIDENTIALITY RISK</span>Unpatched packages and configuration drift preserve known weaknesses.</p><p>Inspect package metadata and automatic update settings; propose a tested maintenance window.</p><div class="control-chips"><span>A.8.8</span><span>A.8.9</span></div><p class="clause-note">ISMS clause links: 6.1.3 · suggested applicability</p></div><div class="step-evidence"><div class="table-wrap"><table><thead><tr><th>Observed control</th><th>Status</th></tr></thead><tbody><tr class="check-row" data-status="pass" data-search="C03 No pending packages in fresh metadata A.8.8 A.8.9 Pending: 0; metadata age hours: 1.2. No package refresh or vulnerability scan was performed."><td><span class="evidence-id">C03</span><strong class="check-title">No pending packages in fresh metadata</strong><p>Pending: 0; metadata age hours: 1.2. No package refresh or vulnerability scan was performed.</p><span class="source">SOURCE · APT cached package metadata</span></td><td><span class="status status-pass">pass</span></td></tr><tr class="check-row" data-status="pass" data-search="C04 Automatic security updates configured A.8.8 A.8.9 Configuration indicator only; validate the update service and maintenance policy."><td><span class="evidence-id">C04</span><strong class="check-title">Automatic security updates configured</strong><p>Configuration indicator only; validate the update service and maintenance policy.</p><span class="source">SOURCE · APT periodic configuration</span></td><td><span class="status status-pass">pass</span></td></tr></tbody></table></div></div></div><div class="human-review"><span class="review-icon">↗</span><div><strong>Independent review remains</strong><p>Refresh package metadata, scan vulnerabilities, approve patch SLAs and test rollback.</p></div></div></section><section class="process-step" id="step-3"><div class="step-heading"><span class="step-number">03</span><div><span class="section-eyebrow">IDENTITY</span><h3>Constrain identities and access</h3></div><span class="step-label">STEP 03 / 10</span></div><div class="step-body"><div class="step-story"><p class="risk"><span>CONFIDENTIALITY RISK</span>Shared privileged accounts and weak authentication expose confidential data.</p><p>Review UID-zero accounts and effective SSH policy; optionally deploy validated key-only SSH settings.</p><div class="control-chips"><span>A.5.15</span><span>A.5.16</span><span>A.5.18</span><span>A.8.2</span><span>A.8.5</span></div><p class="clause-note">ISMS clause links: 6.1.3 · suggested applicability</p></div><div class="step-evidence"><div class="table-wrap"><table><thead><tr><th>Observed control</th><th>Status</th></tr></thead><tbody><tr class="check-row" data-status="pass" data-search="C05 Single expected UID-zero account A.5.15 A.5.16 A.5.18 A.8.2 A.8.5 UID-zero accounts: root"><td><span class="evidence-id">C05</span><strong class="check-title">Single expected UID-zero account</strong><p>UID-zero accounts: root</p><span class="source">SOURCE · System account database</span></td><td><span class="status status-pass">pass</span></td></tr><tr class="check-row" data-status="fail" data-search="C06 Direct SSH root login disabled A.5.15 A.5.16 A.5.18 A.8.2 A.8.5 Observed PermitRootLogin: yes"><td><span class="evidence-id">C06</span><strong class="check-title">Direct SSH root login disabled</strong><p>Observed PermitRootLogin: yes</p><span class="source">SOURCE · sshd -T</span></td><td><span class="status status-fail">fail</span></td></tr><tr class="check-row" data-status="fail" data-search="C07 Key-only SSH policy A.5.15 A.5.16 A.5.18 A.8.2 A.8.5 Requires PasswordAuthentication=no, KbdInteractiveAuthentication=no, PubkeyAuthentication=yes. Match blocks need independent validation."><td><span class="evidence-id">C07</span><strong class="check-title">Key-only SSH policy</strong><p>Requires PasswordAuthentication=no, KbdInteractiveAuthentication=no, PubkeyAuthentication=yes. Match blocks need independent validation.</p><span class="source">SOURCE · sshd -T</span></td><td><span class="status status-fail">fail</span></td></tr></tbody></table></div></div></div><div class="human-review"><span class="review-icon">↗</span><div><strong>Independent review remains</strong><p>Verify an independent key-authenticated login before changing SSH; review MFA and account lifecycle.</p></div></div></section><section class="process-step" id="step-4"><div class="step-heading"><span class="step-number">04</span><div><span class="section-eyebrow">NETWORK</span><h3>Separate network trust zones</h3></div><span class="step-label">STEP 04 / 10</span></div><div class="step-body"><div class="step-story"><p class="risk"><span>CONFIDENTIALITY RISK</span>Unnecessary listeners and permissive network boundaries permit unwanted access.</p><p>Inventory listening sockets and locally visible firewall policy without sending network probes.</p><div class="control-chips"><span>A.8.20</span><span>A.8.21</span><span>A.8.22</span></div><p class="clause-note">ISMS clause links: 6.1.3 · suggested applicability</p></div><div class="step-evidence"><div class="table-wrap"><table><thead><tr><th>Observed control</th><th>Status</th></tr></thead><tbody><tr class="check-row" data-status="fail" data-search="C08 No wildcard listeners A.8.20 A.8.21 A.8.22 Wildcard listeners: 1. This conservative finding requires an intentional-service review; a public listener is not itself an exploit."><td><span class="evidence-id">C08</span><strong class="check-title">No wildcard listeners</strong><p>Wildcard listeners: 1. This conservative finding requires an intentional-service review; a public listener is not itself an exploit.</p><span class="source">SOURCE · ss -H -lntu</span></td><td><span class="status status-fail">fail</span></td></tr><tr class="check-row" data-status="pass" data-search="C09 Default-drop firewall indicator A.8.20 A.8.21 A.8.22 An observed drop policy is only an indicator; traffic coverage, cloud firewalls and Docker rules require review."><td><span class="evidence-id">C09</span><strong class="check-title">Default-drop firewall indicator</strong><p>An observed drop policy is only an indicator; traffic coverage, cloud firewalls and Docker rules require review.</p><span class="source">SOURCE · nft list ruleset</span></td><td><span class="status status-pass">pass</span></td></tr></tbody></table></div></div></div><div class="human-review"><span class="review-icon">↗</span><div><strong>Independent review remains</strong><p>Review cloud security groups, Docker host policies, management access and egress filtering.</p></div></div></section><section class="process-step" id="step-5"><div class="step-heading"><span class="step-number">05</span><div><span class="section-eyebrow">ENCRYPTION</span><h3>Protect cryptography and keys</h3></div><span class="step-label">STEP 05 / 10</span></div><div class="step-body"><div class="step-story"><p class="risk"><span>CONFIDENTIALITY RISK</span>Cleartext transport, storage or exposed keys reveal sensitive information.</p><p>Inspect effective SSH cipher policy and available storage-encryption indicators.</p><div class="control-chips"><span>A.8.24</span><span>A.5.17</span></div><p class="clause-note">ISMS clause links: 6.1.3 · suggested applicability</p></div><div class="step-evidence"><div class="table-wrap"><table><thead><tr><th>Observed control</th><th>Status</th></tr></thead><tbody><tr class="check-row" data-status="pass" data-search="C10 Legacy SSH ciphers absent A.8.24 A.5.17 Effective SSH cipher list checked for legacy CBC/3DES/RC4 indicators."><td><span class="evidence-id">C10</span><strong class="check-title">Legacy SSH ciphers absent</strong><p>Effective SSH cipher list checked for legacy CBC/3DES/RC4 indicators.</p><span class="source">SOURCE · sshd -T</span></td><td><span class="status status-pass">pass</span></td></tr><tr class="check-row" data-status="unknown" data-search="C11 Encrypted-storage coverage A.8.24 A.5.17 LUKS device indicator: False. This does not prove encryption of the root volume or all confidential paths."><td><span class="evidence-id">C11</span><strong class="check-title">Encrypted-storage coverage</strong><p>LUKS device indicator: False. This does not prove encryption of the root volume or all confidential paths.</p><span class="source">SOURCE · Storage indicators + human review</span></td><td><span class="status status-unknown">unknown</span></td></tr></tbody></table></div></div></div><div class="human-review"><span class="review-icon">↗</span><div><strong>Independent review remains</strong><p>Verify application TLS, certificate lifecycle, encryption of all confidential volumes and independent key custody.</p></div></div></section><section class="process-step" id="step-6"><div class="step-heading"><span class="step-number">06</span><div><span class="section-eyebrow">SYSTEM</span><h3>Reduce system attack surface</h3></div><span class="step-label">STEP 06 / 10</span></div><div class="step-body"><div class="step-story"><p class="risk"><span>CONFIDENTIALITY RISK</span>Kernel information leaks and avoidable privileges increase compromise impact.</p><p>Inspect a bounded kernel baseline; apply supported information-disclosure and link-protection settings.</p><div class="control-chips"><span>A.8.9</span><span>A.8.19</span><span>A.8.27</span></div><p class="clause-note">ISMS clause links: 6.1.3 · suggested applicability</p></div><div class="step-evidence"><div class="table-wrap"><table><thead><tr><th>Observed control</th><th>Status</th></tr></thead><tbody><tr class="check-row" data-status="fail" data-search="C12 kernel.dmesg_restrict A.8.9 A.8.19 A.8.27 Observed 0; baseline 1. Host-owned settings are excluded for containers and WSL."><td><span class="evidence-id">C12</span><strong class="check-title">kernel.dmesg_restrict</strong><p>Observed 0; baseline 1. Host-owned settings are excluded for containers and WSL.</p><span class="source">SOURCE · /proc/sys/kernel/dmesg_restrict</span></td><td><span class="status status-fail">fail</span></td></tr><tr class="check-row" data-status="fail" data-search="C13 kernel.kptr_restrict A.8.9 A.8.19 A.8.27 Observed 0; baseline 2. Host-owned settings are excluded for containers and WSL."><td><span class="evidence-id">C13</span><strong class="check-title">kernel.kptr_restrict</strong><p>Observed 0; baseline 2. Host-owned settings are excluded for containers and WSL.</p><span class="source">SOURCE · /proc/sys/kernel/kptr_restrict</span></td><td><span class="status status-fail">fail</span></td></tr><tr class="check-row" data-status="pass" data-search="C14 fs.protected_hardlinks A.8.9 A.8.19 A.8.27 Observed 1; baseline 1. Host-owned settings are excluded for containers and WSL."><td><span class="evidence-id">C14</span><strong class="check-title">fs.protected_hardlinks</strong><p>Observed 1; baseline 1. Host-owned settings are excluded for containers and WSL.</p><span class="source">SOURCE · /proc/sys/fs/protected_hardlinks</span></td><td><span class="status status-pass">pass</span></td></tr><tr class="check-row" data-status="pass" data-search="C15 fs.protected_symlinks A.8.9 A.8.19 A.8.27 Observed 1; baseline 1. Host-owned settings are excluded for containers and WSL."><td><span class="evidence-id">C15</span><strong class="check-title">fs.protected_symlinks</strong><p>Observed 1; baseline 1. Host-owned settings are excluded for containers and WSL.</p><span class="source">SOURCE · /proc/sys/fs/protected_symlinks</span></td><td><span class="status status-pass">pass</span></td></tr></tbody></table></div></div></div><div class="human-review"><span class="review-icon">↗</span><div><strong>Independent review remains</strong><p>Review service privilege, container capabilities, host kernel and hypervisor configuration.</p></div></div></section><section class="process-step" id="step-7"><div class="step-heading"><span class="step-number">07</span><div><span class="section-eyebrow">DATA</span><h3>Minimize data exposure</h3></div><span class="step-label">STEP 07 / 10</span></div><div class="step-body"><div class="step-story"><p class="risk"><span>CONFIDENTIALITY RISK</span>Broad file permissions and permissive defaults disclose confidential records.</p><p>Inspect metadata of configured sensitive paths and shadow-file permissions; install a restrictive login-shell umask.</p><div class="control-chips"><span>A.8.3</span><span>A.8.11</span><span>A.8.12</span><span>A.5.34</span></div><p class="clause-note">ISMS clause links: 6.1.3 · suggested applicability</p></div><div class="step-evidence"><div class="table-wrap"><table><thead><tr><th>Observed control</th><th>Status</th></tr></thead><tbody><tr class="check-row" data-status="pass" data-search="C16 Shadow file not world accessible A.8.3 A.8.11 A.8.12 A.5.34 Checks mode bits only; never reads password hashes."><td><span class="evidence-id">C16</span><strong class="check-title">Shadow file not world accessible</strong><p>Checks mode bits only; never reads password hashes.</p><span class="source">SOURCE · /etc/shadow metadata</span></td><td><span class="status status-pass">pass</span></td></tr><tr class="check-row" data-status="pass" data-search="C17 Configured confidential paths restrict other users A.8.3 A.8.11 A.8.12 A.5.34 1 configured path(s). ACLs, parent permissions and recursive descendants require separate review."><td><span class="evidence-id">C17</span><strong class="check-title">Configured confidential paths restrict other users</strong><p>1 configured path(s). ACLs, parent permissions and recursive descendants require separate review.</p><span class="source">SOURCE · Configured path metadata</span></td><td><span class="status status-pass">pass</span></td></tr><tr class="check-row" data-status="fail" data-search="C18 Managed login-shell umask configured A.8.3 A.8.11 A.8.12 A.5.34 Aegis drop-in sets umask 027 or stricter for new login shells. It does not prove the umask of existing processes."><td><span class="evidence-id">C18</span><strong class="check-title">Managed login-shell umask configured</strong><p>Aegis drop-in sets umask 027 or stricter for new login shells. It does not prove the umask of existing processes.</p><span class="source">SOURCE · /etc/profile.d/99-aegis-umask.sh</span></td><td><span class="status status-fail">fail</span></td></tr></tbody></table></div></div></div><div class="human-review"><span class="review-icon">↗</span><div><strong>Independent review remains</strong><p>Test application authorization, retention, masking, export controls and DLP independently.</p></div></div></section><section class="process-step" id="step-8"><div class="step-heading"><span class="step-number">08</span><div><span class="section-eyebrow">MONITORING</span><h3>Observe and investigate access</h3></div><span class="step-label">STEP 08 / 10</span></div><div class="step-body"><div class="step-story"><p class="risk"><span>CONFIDENTIALITY RISK</span>Missing logs, alerts or synchronized clocks prevent reliable investigation.</p><p>Observe local logging services and time-synchronization status; preserve a local workflow evidence chain.</p><div class="control-chips"><span>A.8.15</span><span>A.8.16</span><span>A.8.17</span></div><p class="clause-note">ISMS clause links: 9.1 · suggested applicability</p></div><div class="step-evidence"><div class="table-wrap"><table><thead><tr><th>Observed control</th><th>Status</th></tr></thead><tbody><tr class="check-row" data-status="pass" data-search="C19 Local logging service active A.8.15 A.8.16 A.8.17 {&#39;systemd-journald&#39;: &#39;active&#39;, &#39;auditd&#39;: &#39;inactive&#39;, &#39;rsyslog&#39;: &#39;inactive&#39;}"><td><span class="evidence-id">C19</span><strong class="check-title">Local logging service active</strong><p>{&#39;systemd-journald&#39;: &#39;active&#39;, &#39;auditd&#39;: &#39;inactive&#39;, &#39;rsyslog&#39;: &#39;inactive&#39;}</p><span class="source">SOURCE · systemctl is-active</span></td><td><span class="status status-pass">pass</span></td></tr><tr class="check-row" data-status="pass" data-search="C20 System clock synchronization reported A.8.15 A.8.16 A.8.17 Inherited time and external synchronization require review in containers and WSL."><td><span class="evidence-id">C20</span><strong class="check-title">System clock synchronization reported</strong><p>Inherited time and external synchronization require review in containers and WSL.</p><span class="source">SOURCE · timedatectl NTPSynchronized</span></td><td><span class="status status-pass">pass</span></td></tr></tbody></table></div></div></div><div class="human-review"><span class="review-icon">↗</span><div><strong>Independent review remains</strong><p>Validate remote log custody, confidentiality of logs, alert coverage and incident escalation.</p></div></div></section><section class="process-step" id="step-9"><div class="step-heading"><span class="step-number">09</span><div><span class="section-eyebrow">RECOVERY</span><h3>Secure backups and prove recovery</h3></div><span class="step-label">STEP 09 / 10</span></div><div class="step-body"><div class="step-story"><p class="risk"><span>CONFIDENTIALITY RISK</span>A stolen backup reveals data; an untested copy may not restore.</p><p>Inspect the metadata of explicitly configured backup paths and document recovery evidence gaps.</p><div class="control-chips"><span>A.8.13</span><span>A.5.30</span></div><p class="clause-note">ISMS clause links: 8.1 · suggested applicability</p></div><div class="step-evidence"><div class="table-wrap"><table><thead><tr><th>Observed control</th><th>Status</th></tr></thead><tbody><tr class="check-row" data-status="pass" data-search="C21 Configured backup paths restrict other users A.8.13 A.5.30 1 configured backup path(s). Existence and permissions do not prove encryption or a successful restore."><td><span class="evidence-id">C21</span><strong class="check-title">Configured backup paths restrict other users</strong><p>1 configured backup path(s). Existence and permissions do not prove encryption or a successful restore.</p><span class="source">SOURCE · Configured backup path metadata</span></td><td><span class="status status-pass">pass</span></td></tr><tr class="check-row" data-status="unknown" data-search="C22 Recovery exercise and backup encryption proven A.8.13 A.5.30 Provide independently verified restore evidence, backup encryption details, RPO/RTO and key custody."><td><span class="evidence-id">C22</span><strong class="check-title">Recovery exercise and backup encryption proven</strong><p>Provide independently verified restore evidence, backup encryption details, RPO/RTO and key custody.</p><span class="source">SOURCE · Human review</span></td><td><span class="status status-unknown">unknown</span></td></tr></tbody></table></div></div></div><div class="human-review"><span class="review-icon">↗</span><div><strong>Independent review remains</strong><p>Verify backup encryption, separate keys, offsite custody, RPO/RTO and a real restore exercise.</p></div></div></section><section class="process-step" id="step-10"><div class="step-heading"><span class="step-number">10</span><div><span class="section-eyebrow">EVIDENCE</span><h3>Validate and build the audit dossier</h3></div><span class="step-label">STEP 10 / 10</span></div><div class="step-body"><div class="step-story"><p class="risk"><span>CONFIDENTIALITY RISK</span>Presentation quality can obscure missing evidence and residual risk.</p><p>Compare immutable audit snapshots, verify changes and create a traceable English HTML/Markdown dossier.</p><div class="control-chips"><span>A.5.35</span><span>A.5.36</span><span>A.8.32</span></div><p class="clause-note">ISMS clause links: 7.5, 9.2, 10.2 · suggested applicability</p></div><div class="step-evidence"><div class="table-wrap"><table><thead><tr><th>Observed control</th><th>Status</th></tr></thead><tbody><tr class="check-row" data-status="pass" data-search="C23 Target evidence collected A.5.35 A.5.36 A.8.32 Timestamped snapshot collected; integrity is checked when it is loaded from the evidence store."><td><span class="evidence-id">C23</span><strong class="check-title">Target evidence collected</strong><p>Timestamped snapshot collected; integrity is checked when it is loaded from the evidence store.</p><span class="source">SOURCE · Bounded collector</span></td><td><span class="status status-pass">pass</span></td></tr></tbody></table></div></div></div><div class="human-review"><span class="review-icon">↗</span><div><strong>Independent review remains</strong><p>Independently approve applicability, risk treatment, evidence sufficiency and corrective actions. Technical checks are not certification.</p></div></div></section>
+
+      <section class="roadmap" id="roadmap"><div class="section-eyebrow">NEXT / PRIORITIZED TREATMENT</div><h2>Turn findings into<br>owned, verifiable actions.</h2><ol><li><span>01</span><p>Direct SSH root login disabled</p><strong>ASSIGN OWNER → VERIFY</strong></li><li><span>02</span><p>Key-only SSH policy</p><strong>ASSIGN OWNER → VERIFY</strong></li><li><span>03</span><p>No wildcard listeners</p><strong>ASSIGN OWNER → VERIFY</strong></li><li><span>04</span><p>kernel.dmesg_restrict</p><strong>ASSIGN OWNER → VERIFY</strong></li><li><span>05</span><p>kernel.kptr_restrict</p><strong>ASSIGN OWNER → VERIFY</strong></li></ol><p class="narrative-label">Summary and priorities are commentary. Evidence tables remain tied to the collected snapshot.</p></section>
+
+      <section class="methodology"><div class="section-eyebrow">METHOD / LIMITS / PROVENANCE</div><h2>A report you can trace.</h2><div class="method-grid"><div><h4>Bounded collection</h4><p>Selected settings and metadata are collected from a locally registered target. File contents containing confidential data, password hashes and private keys are excluded. Application authorization, external TLS, cloud policy and recovery tests need separate evidence.</p></div><div><h4>Standards alignment</h4><p>ISO mappings are original educational suggestions. Confirm control applicability, the Statement of Applicability and organizational requirements with a qualified reviewer. Include the 2024 context amendment in the real ISMS scope review.</p></div><div><h4>Evidence integrity</h4><p>Snapshot identifiers use SHA-256. The local event chain detects accidental modification, but a workspace administrator can rewrite it. Independent custody or signed external evidence is needed for stronger assurance.</p></div><div><h4>Time and ownership</h4><p>Findings describe the target at collection time. A container or WSL guest cannot establish every host control. Assign owners, document accepted risk and retest changes before closing findings.</p></div></div><div class="evidence-footer"><span>EVIDENCE SNAPSHOT</span><code>1e6aac18aedfd812c43a6717feb97709756b69f5755942d12cbe73c31529f876</code><span>COLLECTED 2026-10-05T00:00:00+00:00</span></div><ul class="references"><li><a href="https://www.iso.org/standard/27001" rel="noopener noreferrer">ISO/IEC 27001:2022 — ISMS requirements ↗</a></li><li><a href="https://www.iso.org/standard/75652.html" rel="noopener noreferrer">ISO/IEC 27002:2022 — control guidance ↗</a></li><li><a href="https://github.com/modelcontextprotocol/python-sdk" rel="noopener noreferrer">Official MCP Python SDK ↗</a></li><li><a href="https://modelcontextprotocol.io/specification/2025-11-25/basic/transports" rel="noopener noreferrer">MCP transport specification ↗</a></li></ul></section>
+      <footer><span class="footer-wordmark">AEGIS<span>+</span></span><p>Confidentiality audit preparation.<br>Evidence before assurance.</p><span>END OF DOSSIER / 10 STEPS</span></footer>
+    </article>
+  </main>
+</div>
+<script>(() => {
+  "use strict";
+  const rows = [...document.querySelectorAll(".check-row")];
+  const buttons = [...document.querySelectorAll("[data-filter]")];
+  const search = document.getElementById("search");
+  const status = document.getElementById("filter-status");
+  let filter = "all";
+  function update() {
+    const term = search.value.toLowerCase();
+    let visible = 0;
+    rows.forEach((row) => {
+      row.hidden = !(
+        (filter === "all" || row.dataset.status === filter) &&
+        row.dataset.search.toLowerCase().includes(term)
+      );
+      if (!row.hidden) visible++;
+    });
+    buttons.forEach((button) =>
+      button.classList.toggle("active", button.dataset.filter === filter),
+    );
+    status.textContent = `${visible} of ${rows.length} observed checks shown · independent reviews remain visible`;
+  }
+  buttons.forEach((button) =>
+    button.addEventListener("click", () => {
+      filter = button.dataset.filter;
+      update();
+    }),
+  );
+  search.addEventListener("input", update);
+  document.getElementById("print-report").addEventListener("click", () => {
+    filter = "all";
+    search.value = "";
+    update();
+    window.print();
+  });
+  window.addEventListener("beforeprint", () =>
+    rows.forEach((row) => {
+      row.hidden = false;
+    }),
+  );
+  const sections = [...document.querySelectorAll(".process-step")];
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          document
+            .querySelectorAll(".rail nav a")
+            .forEach((link) =>
+              link.classList.toggle(
+                "current",
+                link.hash === `#${entry.target.id}`,
+              ),
+            );
+          document.querySelector(".rail-label span").textContent =
+            `${entry.target.id.replace("step-", "").padStart(2, "0")} / 10`;
+        }
+      });
+    },
+    { rootMargin: "-10% 0px -70% 0px" },
+  );
+  sections.forEach((section) => observer.observe(section));
+  update();
+})();
+</script>
+</body>
+</html>

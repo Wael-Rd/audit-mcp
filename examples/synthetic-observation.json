@@ -1,0 +1,103 @@
+{
+  "collected_at": 1791000000,
+  "facts": {
+    "os": "Ubuntu 24.04 LTS",
+    "os_id": "ubuntu",
+    "kernel": "6.8.0-example",
+    "architecture": "x86_64",
+    "hostname": "illustrative-system",
+    "uid": 0,
+    "systemd": true,
+    "container": false,
+    "wsl": false,
+    "root_source": "/dev/vda1"
+  },
+  "uid_zero": [
+    "root"
+  ],
+  "ssh": {
+    "available": true,
+    "effective": {
+      "permitrootlogin": "yes",
+      "passwordauthentication": "yes",
+      "kbdinteractiveauthentication": "no",
+      "pubkeyauthentication": "yes",
+      "ciphers": "aes256-gcm@openssh.com"
+    },
+    "dropin_included": true,
+    "match_rules": false
+  },
+  "network": {
+    "available": true,
+    "listeners": [
+      {
+        "protocol": "tcp",
+        "address": "0.0.0.0:22"
+      }
+    ],
+    "firewall": {
+      "available": true,
+      "default_drop_indicated": true
+    }
+  },
+  "patches": {
+    "available": true,
+    "metadata_age_hours": 1.2,
+    "pending": 0,
+    "automatic_configured": true
+  },
+  "sysctl": {
+    "kernel.dmesg_restrict": "0",
+    "kernel.kptr_restrict": "0",
+    "fs.protected_hardlinks": "1",
+    "fs.protected_symlinks": "1"
+  },
+  "managed_files": {
+    "sysctl": {
+      "path": "/etc/sysctl.d/99-aegis.conf",
+      "content": null,
+      "exists": false,
+      "managed": false
+    },
+    "umask": {
+      "path": "/etc/profile.d/99-aegis-umask.sh",
+      "content": null,
+      "exists": false,
+      "managed": false
+    },
+    "ssh": {
+      "path": "/etc/ssh/sshd_config.d/00-aegis.conf",
+      "content": null,
+      "exists": false,
+      "managed": false
+    }
+  },
+  "services": {
+    "systemd-journald": "active",
+    "auditd": "inactive",
+    "rsyslog": "inactive"
+  },
+  "ntp": "yes",
+  "storage": {
+    "luks_indicator": false
+  },
+  "shadow": {
+    "path": "/etc/shadow",
+    "status": "observed",
+    "mode": "0o640"
+  },
+  "sensitive_paths": [
+    {
+      "path": "/srv/private",
+      "status": "observed",
+      "mode": "0o700"
+    }
+  ],
+  "backup_paths": [
+    {
+      "path": "/srv/backups",
+      "status": "observed",
+      "mode": "0o700"
+    }
+  ]
+}

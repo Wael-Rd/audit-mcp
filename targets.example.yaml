@@ -1,0 +1,36 @@
+# Copy to targets.yaml (gitignored). Only registered target IDs can be used by AI.
+# No host, container ID, path or shell command can be supplied through MCP tools.
+targets:
+  wsl:
+    transport: local
+    description: My local WSL Linux instance
+    owner: System owner
+    classification: confidential
+    allow_apply: false
+    sensitive_paths: []  # e.g. /srv/private; metadata only, never file contents
+    backup_paths: []     # e.g. /srv/backups; does not imply encryption or recovery
+  vps:
+    transport: ssh
+    description: My own Ubuntu or Debian VPS
+    host: vps.example.invalid
+    user: auditor
+    port: 22
+    identity_file: ~/.ssh/id_ed25519
+    known_hosts_file: ~/.ssh/known_hosts
+    sudo: false         # true uses sudo -n; configure access locally first
+    owner: System owner
+    classification: confidential
+    allow_apply: false
+    # Set only after verifying another working key-authenticated admin session.
+    ssh_key_access_verified: false
+    sensitive_paths: []
+    backup_paths: []
+  container:
+    transport: docker
+    description: My existing Linux container (Python 3 required inside)
+    container: my-app
+    owner: System owner
+    classification: confidential
+    allow_apply: false
+    sensitive_paths: []
+    backup_paths: []
