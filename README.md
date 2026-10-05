@@ -65,6 +65,8 @@ For clients using the common `mcpServers` configuration shape:
 
 Use absolute paths and make `uv` available to the client process. Client configuration shapes differ; see [connection examples](docs/connecting-ai.md). Aegis works with **MCP-compatible AI hosts**. A model without an MCP host needs an adapter. Your chosen host handles model credentials and inference; Aegis does not call a paid model itself.
 
+For OpenCode, use [examples/opencode.json](examples/opencode.json): OpenCode expects an `mcp` mapping rather than `mcpServers`. The [OpenCode setup instructions](docs/connecting-ai.md#opencode) explain how to merge it and verify `aegis connected`.
+
 Suggested first request:
 
 > Use Aegis to summarize the ten-step hardening best-practice guide, audit my registered `wsl` target for confidentiality readiness, and produce a professional English report using the embedded template. Keep missing evidence and human review items visible. Do not apply target changes.

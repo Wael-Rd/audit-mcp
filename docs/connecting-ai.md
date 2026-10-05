@@ -12,6 +12,24 @@ uv --directory /absolute/path/to/audit_mcp run --frozen aegis-mcp
 
 Clients may use different configuration wrappers. Examples are provided in `examples/`: a common `mcpServers` shape, a VS Code `servers` shape, and a generic loopback HTTP endpoint. Replace all paths; keep credentials outside the repository. Use the same Linux environment for local WSL collection and the server.
 
+## OpenCode
+
+OpenCode uses an `mcp` mapping with `type: "local"`, a command array and an `environment` object. [examples/opencode.json](../examples/opencode.json) supplies that configuration. Run `uv sync --frozen`, replace its absolute paths, and merge the `aegis` entry into your OpenCode configuration. Preserve your existing providers and other MCP entries. The direct virtual-environment Python command avoids dependency resolution during startup.
+
+Merge the entry into your global `~/.config/opencode/opencode.jsonc` or existing `opencode.json` to use Aegis across projects. Reopen an existing OpenCode session to load the change, then check:
+
+```bash
+opencode mcp list
+```
+
+Look for `aegis connected`. Aegis tools use the `aegis_` prefix, such as `aegis_get_hardening_guide` and `aegis_audit_target`. Ask:
+
+> Use Aegis to audit registered target `wsl` against the ten-step confidentiality hardening guide, then generate a professional English report using the embedded template. Keep target changes disabled and show missing evidence.
+
+Target registrations stay in the ignored `targets.yaml`. Register only your own systems. The local WSL entry can start with no sensitive/backup paths and `classification: unclassified` until the operator supplies its real scope and classification.
+
+OpenCode setup reference: [official MCP server configuration](https://opencode.ai/docs/en/mcp-servers/).
+
 `targets.yaml` registers your own systems. The model can request only a target ID; it cannot introduce a hostname, container ID or shell command. Keep only entries you intend to assess. `sudo: true` uses noninteractive `sudo -n`; configure permissions locally rather than putting a password into MCP.
 
 ## Loopback Streamable HTTP
