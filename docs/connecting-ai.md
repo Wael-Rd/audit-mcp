@@ -32,6 +32,46 @@ OpenCode setup reference: [official MCP server configuration](https://opencode.a
 
 `targets.yaml` registers your own systems. The model can request only a target ID; it cannot introduce a hostname, container ID or shell command. Keep only entries you intend to assess. `sudo: true` uses noninteractive `sudo -n`; configure permissions locally rather than putting a password into MCP.
 
+## Custom SDK application
+
+A custom host combines an MCP client SDK with your chosen model SDK or local inference runtime. The application discovers Aegis tools, presents their schemas to the model, executes permitted model-requested calls through MCP, and returns results to the model. It repeats that loop until it has the report paths. The MCP client itself handles protocol communication; your application manages inference and permissions.
+
+This connection-only example uses the project's locked Python MCP SDK. Run it with `uv run python` from the repository after `uv sync --frozen`; it loads the guide and lists tool names without connecting to targets:
+
+```python
+import asyncio
+import os
+import sys
+from pathlib import Path
+
+from mcp import Client
+from mcp.client.stdio import StdioServerParameters
+
+
+async def main():
+    root = Path.cwd()
+    server = StdioServerParameters(
+        command=sys.executable,
+        args=["-m", "aegis_mcp.server"],
+        env={
+            **os.environ,
+            "AEGIS_TARGETS": str(root / "targets.yaml"),
+            "AEGIS_WORKSPACE": str(root / ".runtime"),
+            "AEGIS_ALLOW_APPLY": "0",
+        },
+    )
+    async with Client(server, raise_exceptions=True) as client:
+        tools = await client.list_tools()
+        guide = await client.call_tool("get_hardening_guide")
+        print([tool.name for tool in tools.tools])
+        print(guide.structured_content["subject"])
+
+
+asyncio.run(main())
+```
+
+For the assessment/report loop, follow the [technical sequence diagram](architecture.md#from-request-to-reviewed-report). Use the actual `audit_id` returned by `audit_target` for report context and rendering. Structured MCP results provide the evidence bundle; the model supplies only the accepted narrative fields.
+
 ## Loopback Streamable HTTP
 
 ```bash
